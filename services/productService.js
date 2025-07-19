@@ -11,7 +11,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
  */
 
 const uploadImageToCloudinary = async (fileBuffer, mimeType) => {
-    try{
+    try {
         const dataUri = `data:${mimeType};base64,${fileBuffer.toString('base64')}`;
 
         const result = await cloudinary.uploader.upload(dataUri, {
@@ -19,26 +19,26 @@ const uploadImageToCloudinary = async (fileBuffer, mimeType) => {
             resource_type: 'auto'
         });
         return result;
-    }catch(error){
+    } catch (error) {
         console.error("Cloudinary upload error:", error);
         throw new ApiError("Failed to upload image to cloudinary");
     }
 };
 
-const deleteImageFromCloudinary = async(publicId) => {
-    try{
-        if(!publicId){
+const deleteImageFromCloudinary = async (publicId) => {
+    try {
+        if (!publicId) {
             return null;
         }
         const result = await cloudinary.uploader.destroy(publicId);
         console.log(result);
 
-        if(result.result !== 'ok'){
+        if (result.result !== 'ok') {
             console.error("Cloudinary deletation failed for publicId:", publicId, "Result: ", result);
             return false;
         }
         return true;
-    }catch(error){
+    } catch (error) {
         console.error("Error while deleting from cloudinary:", error);
         throw new ApiError("Failed to delete image from cloudinary.");
     }
@@ -46,10 +46,10 @@ const deleteImageFromCloudinary = async(publicId) => {
 
 const validOwnership = async (pid, wid) => {
     const product = await Products.findById(pid);
-    if(!product){
+    if (!product) {
         return new ApiResponse(400, null, "Product not found!")
     }
-    if(product.owner._id.toString() !== wid){
+    if (product.owner._id.toString() !== wid) {
         return false;
     }
     return true;
@@ -62,53 +62,75 @@ const validOwnership = async (pid, wid) => {
  */
 
 const createProductInDb = async (productData) => {
-    try{
+    try {
         const newProduct = new Products(productData);
         await newProduct.save();
         return newProduct;
-    }catch(error){
+    } catch (error) {
         console.error("Database save error wile product:", error);
         throw new ApiError("Failed to save product to the database.");
     }
 };
 
 const getAllProductsFromDB = async () => {
-    try{
+    try {
         const products = await Products.find({});
         return products;
-    }catch(error){
+    } catch (error) {
         console.error("Database retrival errors while fetching products: ", error);
         throw new ApiError(500, "Failed to retrive products from the database.")
     }
 }
 
 const deleteOnePrd = async (productId, productName, wid) => {
-    if(!productId || !productName){
+    if (!productId || !productName) {
         throw new ApiError(400, "ProductId and product name are required.")
     }
-    try{
-        const productToDelete = await Products.findOne({_id:productId, name: productName.toLowerCase() });
-        if(!productToDelete){
+    try {
+        const productToDelete = await Products.findOne({ _id: productId, name: productName.toLowerCase() });
+        if (!productToDelete) {
             throw new ApiError(400, "Product not found or name didn't match!")
         }
-        if(productToDelete.imagePublicId){
+        if (productToDelete.imagePublicId) {
             const cloudinaryDeleteSuccess = await deleteImageFromCloudinary(productToDelete.imagePublicId);
-            if(!cloudinaryDeleteSuccess){
+            if (!cloudinaryDeleteSuccess) {
                 console.warn(`Failed to delete image from Cloudinary for product_id${productId}. Public_id: ${productId.imagePublicId}.`);
             }
         }
 
-        const result = await Products.deleteOne({_id:productId});
-        if(result.deletedCount === 0){
+        const result = await Products.deleteOne({ _id: productId });
+        if (result.deletedCount === 0) {
             throw new ApiError(400, "Product not found for deletation after image processing.")
         }
-        return { message: "Product deleted successfully"};
-    }catch(error){
-        if(error instanceof ApiError){
+        return { message: "Product deleted successfully" };
+    } catch (error) {
+        if (error instanceof ApiError) {
             throw error;
         }
         console.error(`Error while deleteing productId:${productId} Error: ${error}`);
         throw new ApiError(500, "Some thing went wrong while deleting Product.")
+    }
+}
+
+const searchProductByName = async (pname) => {
+    try {
+        if (!pname || pname.trim() === "") {
+            return null;
+        }
+        const keywords = pname.trim().split(/\s+/).filter(Boolean);
+        // const searchConditions = keywords.map(keyword => (
+            // { name: {$regex: new RegExp(keyword, 'i')} }
+        // ));
+        const searchConditions = keywords.flatMap(keyword => [
+            { name: { $regex: new RegExp(keyword, 'i') } },
+            { catagory: { $regex: new RegExp(keyword, 'i') } }
+        ]);
+
+        const products = Products.find({ $or: searchConditions });
+        return products;
+    } catch (err) {
+        console.error("Db retrival error wile searching products: ", error);
+        throw new ApiError(500, "Failed to search products.")
     }
 }
 
@@ -118,5 +140,6 @@ export const productService = {
     createProductInDb,
     deleteOnePrd,
     getAllProductsFromDB,
-    validOwnership
+    validOwnership,
+    searchProductByName
 };

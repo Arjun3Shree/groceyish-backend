@@ -4,7 +4,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { verifyUser } from "../middlewares/authMiddleware.js";
 
-const { uploadImageToCloudinary, createProductInDb, deleteOnePrd, getAllProductsFromDB, validOwnership } = productService;
+const { uploadImageToCloudinary, createProductInDb, deleteOnePrd, getAllProductsFromDB, validOwnership, searchProductByName } = productService;
 
 /**
  * Controller to handle product creation, including image upload to Cloudinary
@@ -105,7 +105,14 @@ const deleteOne = asyncHandler( async(req, res)=> {
 
 const prdsearch = asyncHandler(async(req, res)=>{
     let searchq = req.query.find;
-    res.status(200).json(new ApiResponse(200, {searchq}, "Recived keyword..."))
+    const prdList = await searchProductByName(searchq);
+    if(!prdList || prdList == null){
+        return res.status(400)
+        .json(400, null, "No product found as searched.")
+    }
+    return res.status(200)
+    .json( new ApiResponse(200, prdList, "All product as searched."))
+
 })
 
 export { createProduct, getAllProducts, deleteOne, prdsearch };
