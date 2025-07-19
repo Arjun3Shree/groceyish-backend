@@ -2,8 +2,9 @@ import { productService } from "../services/productService.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { verifyUser } from "../middlewares/authMiddleware.js";
 
-const { uploadImageToCloudinary, createProductInDb, deleteOnePrd, getAllProductsFromDB } = productService;
+const { uploadImageToCloudinary, createProductInDb, deleteOnePrd, getAllProductsFromDB, validOwnership } = productService;
 
 /**
  * Controller to handle product creation, including image upload to Cloudinary
@@ -20,6 +21,11 @@ const createProduct = asyncHandler(async (req, res) => {
         const {name, price, quantity, typequant, catagory, owner } = req.body;
         if(!name || !price || !quantity || !typequant || !catagory || !owner){
             return new ApiError(400, "All fields are require!")
+        }
+        const user = await verifyUser(owner);
+        if(user.usertype !== "seller"){
+            return res.status(401)
+            .json(new ApiResponse(401, null, "User not authorize to add product"));
         }
 
         let imageUrl = null;
@@ -83,20 +89,23 @@ const getAllProducts = asyncHandler( async (req, res) => {
 });
 
 const deleteOne = asyncHandler( async(req, res)=> {
-    const {pId, pName} = req.body;
+    const {pId, pName, pOwner} = req.body;
     if(!pId || !pName){
         return new ApiError(400, "Missing Product id or Name.")
     }
-    const deleteResult = await deleteOnePrd(pId, pName);
+    if(!(await validOwnership(pId, pOwner))){
+        return res.status(401)
+        .json(new ApiResponse(401, null, "Not valid access to delete."))
+    }
+    const deleteResult = await deleteOnePrd(pId, pName, pOwner);
 
     return res.status(200).json(new ApiResponse(200, deleteResult, "Product Delete successfully."))
 
 });
 
 const prdsearch = asyncHandler(async(req, res)=>{
-    let searchq = req.params.keyname;
-    let searchq1 = req.params.keyname1;
-    res.status(200).json(new ApiResponse(200, {searchq, searchq1}, "Recived keyword..."))
+    let searchq = req.query.find;
+    res.status(200).json(new ApiResponse(200, {searchq}, "Recived keyword..."))
 })
 
 export { createProduct, getAllProducts, deleteOne, prdsearch };

@@ -24,6 +24,12 @@ const user = new Schema(
             default: "customer",
             enum: ["customer", "seller", "supervisor", "admin"]
         },
+        listedProducts : [
+            {
+            type: Schema.Types.ObjectId,
+            ref: "Products"
+            }
+        ],
         refreshToken: {
             type: String
         }

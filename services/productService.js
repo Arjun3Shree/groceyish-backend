@@ -1,6 +1,7 @@
 import cloudinary from "../config/cloudinaryConfig.js";
 import { Products } from "../models/productsModel.js";
 import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 
 /**
  * Uploads a file buffer to Cloudinary.
@@ -43,6 +44,17 @@ const deleteImageFromCloudinary = async(publicId) => {
     }
 }
 
+const validOwnership = async (pid, wid) => {
+    const product = await Products.findById(pid);
+    if(!product){
+        return new ApiResponse(400, null, "Product not found!")
+    }
+    if(product.owner._id.toString() !== wid){
+        return false;
+    }
+    return true;
+}
+
 /**
  * Creates a new product in the database.
  * @param {object} productData - The product data to save.
@@ -70,7 +82,7 @@ const getAllProductsFromDB = async () => {
     }
 }
 
-const deleteOnePrd = async (productId, productName) => {
+const deleteOnePrd = async (productId, productName, wid) => {
     if(!productId || !productName){
         throw new ApiError(400, "ProductId and product name are required.")
     }
@@ -105,5 +117,6 @@ export const productService = {
     deleteImageFromCloudinary,
     createProductInDb,
     deleteOnePrd,
-    getAllProductsFromDB
+    getAllProductsFromDB,
+    validOwnership
 };

@@ -10,7 +10,7 @@ productsRoute.route("/register-product")
 )
 productsRoute.route("/getallproducts").get(getAllProducts)
 productsRoute.route("/deleteOne").post(deleteOne)
-productsRoute.route("/search/:keyname/:keyname1").post(prdsearch)
+productsRoute.route("/search").post(prdsearch)
 
 
 export default productsRoute;

@@ -1,6 +1,4 @@
 import mongoose, { Schema } from "mongoose";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 
 const products = new Schema(
     {
@@ -29,12 +27,13 @@ const products = new Schema(
         },
         catagory: {
             type: String,
-            required: true
+            required: true,
+            enum: ["vegi", "non-veg", "fruite", "grocery", "drinks"]
         },
         owner: {
-            type: String,
-            required: [true, "Owner name is require"],
-            lowercase: true
+            type: Schema.Types.ObjectId,
+            ref: "User",
+            required: [true, "Owner name is require"]
         },
         imageurl: {
             type:String
