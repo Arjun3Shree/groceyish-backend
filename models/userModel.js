@@ -53,6 +53,7 @@ user.methods.generateAccessToken = function (){
     return jwt.sign({
         _id: this._id,
         email: this.email,
+        usertype: this.usertype
     },
     process.env.ACCESS_TOKEN_SECRET,
     { expiresIn: process.env.ACCESS_TOKEN_EXPIRE }
@@ -63,7 +64,7 @@ user.methods.generateRefreshToken = function () {
     return jwt.sign(
         {
             _id: this._id,
-            email: this.email,
+            email: this.email
         },
         process.env.REFRESH_TOKEN_SECRET,
         { expiresIn: process.env.REFRESH_TOKEN_EXPIRE}

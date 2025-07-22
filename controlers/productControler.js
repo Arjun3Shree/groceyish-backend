@@ -4,7 +4,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { verifyUser } from "../middlewares/authMiddleware.js";
 
-const { uploadImageToCloudinary, createProductInDb, deleteOnePrd, getAllProductsFromDB, validOwnership, searchProductByName } = productService;
+const { uploadImageToCloudinary, createProductInDb, deleteOnePrd, getAllProductsFromDB, searchProductByName } = productService;
 
 /**
  * Controller to handle product creation, including image upload to Cloudinary
@@ -93,11 +93,7 @@ const deleteOne = asyncHandler( async(req, res)=> {
     if(!pId || !pName){
         return new ApiError(400, "Missing Product id or Name.")
     }
-    if(!(await validOwnership(pId, pOwner))){
-        return res.status(401)
-        .json(new ApiResponse(401, null, "Not valid access to delete."))
-    }
-    const deleteResult = await deleteOnePrd(pId, pName, pOwner);
+    const deleteResult = await deleteOnePrd(pId, pName);
 
     return res.status(200).json(new ApiResponse(200, deleteResult, "Product Delete successfully."))
 

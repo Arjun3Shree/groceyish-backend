@@ -19,7 +19,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
     const options = {
         httpOnly:true,
-        secure: process.env.NODE_ENV === 'development',
+        secure: process.env.NODE_ENV === 'test',
         sameSite: 'Lax'
     }
 

@@ -44,16 +44,7 @@ const deleteImageFromCloudinary = async (publicId) => {
     }
 }
 
-const validOwnership = async (pid, wid) => {
-    const product = await Products.findById(pid);
-    if (!product) {
-        return new ApiResponse(400, null, "Product not found!")
-    }
-    if (product.owner._id.toString() !== wid) {
-        return false;
-    }
-    return true;
-}
+
 
 /**
  * Creates a new product in the database.
@@ -82,7 +73,7 @@ const getAllProductsFromDB = async () => {
     }
 }
 
-const deleteOnePrd = async (productId, productName, wid) => {
+const deleteOnePrd = async (productId, productName) => {
     if (!productId || !productName) {
         throw new ApiError(400, "ProductId and product name are required.")
     }
@@ -140,6 +131,5 @@ export const productService = {
     createProductInDb,
     deleteOnePrd,
     getAllProductsFromDB,
-    validOwnership,
     searchProductByName
 };
