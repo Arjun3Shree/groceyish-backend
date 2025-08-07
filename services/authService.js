@@ -1,5 +1,6 @@
 import { User } from "../models/userModel.js";
 import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 
 const refil = async () => {
@@ -76,7 +77,8 @@ const loginUser = async (email, password) => {
 
     const isPasswordCorrect = await user.isPasswordCorrect(password);
     if(!isPasswordCorrect){
-        throw new ApiError(401, "Invalid user credentials")
+        throw new ApiError(401, "Invalid user credentials");
+        return null;
     }
 
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
@@ -91,7 +93,7 @@ const loginUser = async (email, password) => {
 
 const logoutUser = async (userId) => {
     const user = User.findByIdAndUpdate(userId, {
-        $set: {refreshToken: undefind }
+        $set: {refreshToken: null }
     },
     { new: true}
     );

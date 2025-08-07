@@ -15,13 +15,18 @@ const { uploadImageToCloudinary, createProductInDb, deleteOnePrd, getAllProducts
 
 const createProduct = asyncHandler(async (req, res) => {
     try{
-        // console.log("req.body:", req.body);
         // console.log("req.file:", req.file);
+        // console.log("Data: ", req.body);
+        // console.log("req.headers:", req.headers.authorization);
+        // console.log("req.user: ", req.user);
 
-        const {name, price, quantity, typequant, catagory, owner } = req.body;
-        if(!name || !price || !quantity || !typequant || !catagory || !owner){
+        const {name, price, quantity, typequant, availablequant, category } = req.body;
+        const owner = req.user._id.toString();
+        if(!name || !price || !quantity || !typequant || !category || !availablequant){
+            console.log("All filds are require..");
             return new ApiError(400, "All fields are require!")
         }
+        
         const user = await verifyUser(owner);
         if(user.usertype !== "seller"){
             return res.status(401)
@@ -46,7 +51,7 @@ const createProduct = asyncHandler(async (req, res) => {
             price,
             quantity,
             typequant,
-            catagory,
+            catagory: category,
             owner,
             imageurl: imageUrl,
             imagePublicId: imagePublicId
@@ -68,6 +73,15 @@ const createProduct = asyncHandler(async (req, res) => {
         return res.status(500).json(
             new ApiResponse(500, null, error.message || "Internal server error during product creation.")
         )
+    }
+});
+
+const createOnePrd = asyncHandler( async(req, res) => {
+    try {
+        console.log(req.body);
+    } catch (error) {
+        console.log("Error in add Prd:", error);
+        throw error;
     }
 });
 
@@ -111,4 +125,4 @@ const prdsearch = asyncHandler(async(req, res)=>{
 
 })
 
-export { createProduct, getAllProducts, deleteOne, prdsearch };
+export { createProduct, createOnePrd, getAllProducts, deleteOne, prdsearch };

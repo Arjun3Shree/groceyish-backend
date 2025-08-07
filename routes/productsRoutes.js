@@ -1,13 +1,18 @@
 import express from "express";
 const productsRoute = express.Router();
-import { createProduct, getAllProducts, deleteOne, prdsearch } from "../controlers/productControler.js";
+import { createProduct, createOnePrd, getAllProducts, deleteOne, prdsearch } from "../controlers/productControler.js";
 import upload from "../middlewares/multerUpload.js";
 import { verifyJWT, authorizeRoles, validOwnership } from "../middlewares/authMiddleware.js";
 
 productsRoute.route("/register-product")
 .post(
-    upload.single('image'),
+    verifyJWT,
+    upload.single('file'),
     createProduct
+)
+productsRoute.route("/add-new-product")
+.post(
+    createOnePrd
 )
 productsRoute.route("/getallproducts").get(verifyJWT, getAllProducts);
 

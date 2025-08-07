@@ -21,6 +21,14 @@ const products = new Schema(
             type: Number,
             default: 1
         },
+        sold: {
+            type: Number,
+            default: 0
+        },
+        soldtarget: {
+            type: Number,
+            default: 10
+        },
         typequant: {
             type: String,
             required: true
@@ -36,10 +44,12 @@ const products = new Schema(
             required: [true, "Owner name is require"]
         },
         imageurl: {
-            type:String
+            type:String,
+            required: [true, "Image Required"]
         },
         imagePublicId: {
-            type: String
+            type: String,
+            required: [true, "Image Required"]
         }
     },
     {

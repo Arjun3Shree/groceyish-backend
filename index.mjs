@@ -9,6 +9,7 @@ const runApp = function(){
     app.listen(PORT, ()=>{
         console.log("App is running on port:", PORT);
         console.log("ENV is in use: ", process.env.VALABC);
+        console.log("My env is:", process.env.NODE_ENV);
     })
 }
 

@@ -19,8 +19,9 @@ const registerUser = asyncHandler(async (req, res) => {
 
     const options = {
         httpOnly:true,
-        secure: process.env.NODE_ENV === 'test',
-        sameSite: 'Lax'
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        domain: 'localhost'
     }
 
     return res.status(201)
@@ -46,7 +47,7 @@ const loginUser = asyncHandler( async(req, res) => {
 
     const options = {
         httpOnly:true,
-        secure: process.env.NODE_ENV === 'development',
+        secure: process.env.NODE_ENV === 'prod',
         sameSite: 'Lax'
     }
 
@@ -56,7 +57,7 @@ const loginUser = asyncHandler( async(req, res) => {
     .json(
         new ApiResponse(
             200,
-            { user, accessToken, refreshToken },
+            { user, accessToken },
             "User login successfully"
         )
     );
